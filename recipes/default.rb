@@ -24,6 +24,7 @@ end
 execute 'start-runsvdir' do
   command value_for_platform(
     'debian' => { 'default' => 'runsvdir-start' },
+    'raspbian' => { 'default' => 'runsvdir-start' },
     'ubuntu' => { 'default' => 'start runsvdir' },
     'gentoo' => { 'default' => '/etc/init.d/runit-start start' }
   )
@@ -94,9 +95,10 @@ when 'debian', 'gentoo'
 
   package 'runit' do
     action :install
-    response_file 'runit.seed' if platform?('ubuntu', 'debian')
+    response_file 'runit.seed' if platform?('ubuntu', 'debian', 'raspbian')
     notifies value_for_platform(
       'debian' => { '4.0' => :run, 'default' => :nothing  },
+      'raspbian' => { '4.0' => :run, 'default' => :nothing  },
       'ubuntu' => {
         'default' => :nothing,
         '9.04' => :run,
@@ -106,6 +108,7 @@ when 'debian', 'gentoo'
     ), 'execute[start-runsvdir]', :immediately
     notifies value_for_platform(
       'debian' => { 'squeeze/sid' => :run, 'default' => :nothing },
+      'raspbian' => { 'squeeze/wheezy' => :run, 'default' => :nothing },
       'default' => :nothing
     ), 'execute[runit-hup-init]', :immediately
     notifies :enable, 'service[runit-start]' if platform?('gentoo')
